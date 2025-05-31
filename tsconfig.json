@@ -3,15 +3,17 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "app/(tabs)/strona-glowna.js", "app/_layout.js", "app/(tabs)/_layout.js", "app/(tabs)/dodaj-wpis.js"  ]
+    "expo-env.d.ts",
+    "app/(tabs)/strona-glowna.js",
+    "app/_layout.js",
+    "app/(tabs)/_layout.js",
+    "app/(tabs)/dodaj-wpis.js"
+  ]
 }

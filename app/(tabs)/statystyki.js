@@ -4,7 +4,11 @@ import { useWpisy } from '../../konteksty/WpisyContext';
 
 export default function Statystyki() {
   const { wpisy } = useWpisy();
-  const [podsumowanie, setPodsumowanie] = useState({ dobrze: 0, srednio: 0, zle: 0 });
+  const [podsumowanie, setPodsumowanie] = useState({
+    dobrze: 0,
+    srednio: 0,
+    zle: 0,
+  });
   const [dominanta, setDominanta] = useState('');
   const [sugestiaTekst, setSugestiaTekst] = useState('');
 
@@ -23,10 +27,14 @@ export default function Statystyki() {
       setSugestiaTekst('Dodaj wpis, aby otrzymać sugestię 😊');
     } else if (max === liczniki.dobrze) {
       setDominanta('Zadowolona 😊');
-      setSugestiaTekst('Świetnie Ci idzie! Pielęgnuj to, co Cię uszczęśliwia 🌟');
+      setSugestiaTekst(
+        'Świetnie Ci idzie! Pielęgnuj to, co Cię uszczęśliwia 🌟'
+      );
     } else if (max === liczniki.srednio) {
       setDominanta('Obojętna 😐');
-      setSugestiaTekst('Spróbuj znaleźć coś drobnego, co wniesie radość do Twojego dnia 🌤️');
+      setSugestiaTekst(
+        'Spróbuj znaleźć coś drobnego, co wniesie radość do Twojego dnia 🌤️'
+      );
     } else {
       setDominanta('Niekoniecznie szczęśliwa 😞');
       setSugestiaTekst('Może czas na rozmowę z kimś bliskim lub spacer? 🌱');

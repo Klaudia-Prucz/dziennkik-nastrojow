@@ -10,10 +10,9 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
 } from 'react-native';
 import { useWpisy } from '../../konteksty/WpisyContext';
-
 
 const PODSUMOWANIE_NASTROJU = ['Dobrze', 'Tak sobie', 'Źle'];
 
@@ -24,39 +23,37 @@ export default function DodajWpis() {
   const [podsumowanie, setPodsumowanie] = useState('');
   const [zdjecie, setZdjecie] = useState(null);
 
-
   const { zapiszWpis } = useWpisy();
   const router = useRouter();
 
   const wybierzZdjecie = async () => {
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== 'granted') {
-    Alert.alert('Brak uprawnień', 'Musisz zezwolić na dostęp do galerii');
-    return;
-  }
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    quality: 0.7,
-  });
-  if (!result.canceled) {
-    setZdjecie(result.assets[0].uri);
-  }
-};
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Brak uprawnień', 'Musisz zezwolić na dostęp do galerii');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+    if (!result.canceled) {
+      setZdjecie(result.assets[0].uri);
+    }
+  };
 
-const zrobZdjecie = async () => {
-  const { status } = await ImagePicker.requestCameraPermissionsAsync();
-  if (status !== 'granted') {
-    Alert.alert('Brak uprawnień', 'Musisz zezwolić na użycie aparatu');
-    return;
-  }
-  const result = await ImagePicker.launchCameraAsync({
-    quality: 0.7,
-  });
-  if (!result.canceled) {
-    setZdjecie(result.assets[0].uri);
-  }
-};
-
+  const zrobZdjecie = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Brak uprawnień', 'Musisz zezwolić na użycie aparatu');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.7,
+    });
+    if (!result.canceled) {
+      setZdjecie(result.assets[0].uri);
+    }
+  };
 
   const zapisz = async () => {
     if (!nastroj.trim()) {
@@ -104,14 +101,22 @@ const zrobZdjecie = async () => {
         multiline
       />
 
-<Text style={styles.label}>Dodaj zdjęcie</Text>
-<View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
-  <Button title="Z galerii" onPress={wybierzZdjecie} color="#FAD6A5" />
-  <Button title="Zrób zdjęcie" onPress={zrobZdjecie} color="#FAD6A5" />
-</View>
-{zdjecie && (
-  <Image source={{ uri: zdjecie }} style={{ width: '100%', height: 200, borderRadius: 10, marginBottom: 20 }} />
-)}
+      <Text style={styles.label}>Dodaj zdjęcie</Text>
+      <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+        <Button title="Z galerii" onPress={wybierzZdjecie} color="#FAD6A5" />
+        <Button title="Zrób zdjęcie" onPress={zrobZdjecie} color="#FAD6A5" />
+      </View>
+      {zdjecie && (
+        <Image
+          source={{ uri: zdjecie }}
+          style={{
+            width: '100%',
+            height: 200,
+            borderRadius: 10,
+            marginBottom: 20,
+          }}
+        />
+      )}
       <Text style={styles.label}>Co zamierzasz dalej zrobić?</Text>
       <TextInput
         style={styles.input}

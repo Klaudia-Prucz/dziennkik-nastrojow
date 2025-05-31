@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
@@ -28,6 +29,11 @@ export default function StronaGlowna() {
     setRefreshing(false);
   };
 
+  const wyloguj = async () => {
+    await AsyncStorage.removeItem('zalogowany');
+    router.replace('/logowanie');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.powitanie}>Cześć Klaudia, jak się dziś czujesz?</Text>
@@ -53,7 +59,7 @@ export default function StronaGlowna() {
           }
           renderItem={({ item, index }) => (
             <Pressable
-              onPress={() => router.push(`/wpis/${index}`)}
+              onPress={() => router.push(`/(tabs)/wpis/${index}`)}
               style={styles.wpis}
             >
               <Text style={styles.data}>
@@ -72,6 +78,10 @@ export default function StronaGlowna() {
           )}
         />
       )}
+
+      <View style={styles.wylogujBtn}>
+        <Button title="Wyloguj się" onPress={wyloguj} color="#a33" />
+      </View>
     </View>
   );
 }
@@ -124,5 +134,9 @@ const styles = StyleSheet.create({
     color: '#777',
     marginTop: 4,
     fontStyle: 'italic',
+  },
+  wylogujBtn: {
+    marginTop: 20,
+    alignSelf: 'flex-start',
   },
 });

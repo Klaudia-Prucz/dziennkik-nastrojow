@@ -1,17 +1,18 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
   Button,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View,
   TouchableWithoutFeedback,
-  Keyboard,
+  View,
 } from 'react-native';
 
 export default function Logowanie() {
@@ -19,8 +20,9 @@ export default function Logowanie() {
   const [haslo, setHaslo] = useState('');
   const router = useRouter();
 
-  const zaloguj = () => {
+  const zaloguj = async () => {
     if (login === 'klaudia' && haslo === '12345') {
+      await AsyncStorage.setItem('zalogowany', 'true');
       router.replace('/(tabs)/strona-glowna');
     } else {
       Alert.alert('Błąd logowania', 'Nieprawidłowy login lub hasło');

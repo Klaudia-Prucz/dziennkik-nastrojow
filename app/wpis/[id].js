@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    Image,
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Image,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { useWpisy } from '../../konteksty/WpisyContext';
 
@@ -33,7 +33,10 @@ export default function SzczegolyWpisu() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable onPress={() => router.replace('/(tabs)/strona-glowna')} style={styles.powrot}>
+        <Pressable
+          onPress={() => router.replace('/(tabs)/strona-glowna')}
+          style={styles.powrot}
+        >
           <Ionicons name="arrow-back" size={20} color="#E76617" />
           <Text style={styles.powrotTekst}>Powrót</Text>
         </Pressable>
