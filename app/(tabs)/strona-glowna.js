@@ -59,7 +59,7 @@ export default function StronaGlowna() {
           }
           renderItem={({ item, index }) => (
             <Pressable
-              onPress={() => router.push(`/(tabs)/wpis/${index}`)}
+              onPress={() => router.push(`/wpis/${index}`)}
               style={styles.wpis}
             >
               <Text style={styles.data}>
