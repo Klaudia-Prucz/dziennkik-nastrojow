@@ -7,21 +7,32 @@ export const WpisyProvider = ({ children }) => {
   const [wpisy, setWpisy] = useState([]);
 
   useEffect(() => {
-    AsyncStorage.getItem('wpisy').then((dane) => {
-      if (dane) setWpisy(JSON.parse(dane));
-    });
+    odswiezWpisy();
   }, []);
 
-  useEffect(() => {
-    AsyncStorage.setItem('wpisy', JSON.stringify(wpisy));
-  }, [wpisy]);
+  const odswiezWpisy = async () => {
+    try {
+      const dane = await AsyncStorage.getItem('wpisy');
+      if (dane) {
+        setWpisy(JSON.parse(dane));
+      }
+    } catch (err) {
+      console.error('Błąd przy odczycie danych:', err);
+    }
+  };
 
-  const dodajWpis = (nowy) => {
-    setWpisy((poprz) => [nowy, ...poprz]);
+  const zapiszWpis = async (nowy) => {
+    try {
+      const noweWpisy = [nowy, ...wpisy];
+      setWpisy(noweWpisy);
+      await AsyncStorage.setItem('wpisy', JSON.stringify(noweWpisy));
+    } catch (err) {
+      console.error('Błąd przy zapisie:', err);
+    }
   };
 
   return (
-    <WpisyContext.Provider value={{ wpisy, dodajWpis }}>
+    <WpisyContext.Provider value={{ wpisy, zapiszWpis, odswiezWpisy }}>
       {children}
     </WpisyContext.Provider>
   );

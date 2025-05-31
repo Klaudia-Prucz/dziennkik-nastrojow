@@ -1,25 +1,99 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useWpisy } from '../../konteksty/WpisyContext';
 
 export default function Statystyki() {
   const { wpisy } = useWpisy();
+  const [podsumowanie, setPodsumowanie] = useState({ dobrze: 0, srednio: 0, zle: 0 });
+  const [dominanta, setDominanta] = useState('');
+  const [sugestiaTekst, setSugestiaTekst] = useState('');
 
-  const pozytywne = wpisy.filter((w) => w.nastrój.includes('😊')).length;
-  const neutralne = wpisy.filter((w) => w.nastrój.includes('😐')).length;
-  const negatywne = wpisy.filter((w) => w.nastrój.includes('😢') || w.nastrój.includes('😡')).length;
+  useEffect(() => {
+    const liczniki = { dobrze: 0, srednio: 0, zle: 0 };
+    wpisy.forEach((wpis) => {
+      if (wpis.podsumowanie === 'Dobrze') liczniki.dobrze++;
+      else if (wpis.podsumowanie === 'Tak sobie') liczniki.srednio++;
+      else if (wpis.podsumowanie === 'Źle') liczniki.zle++;
+    });
+    setPodsumowanie(liczniki);
+
+    const max = Math.max(liczniki.dobrze, liczniki.srednio, liczniki.zle);
+    if (max === 0) {
+      setDominanta('Brak danych');
+      setSugestiaTekst('Dodaj wpis, aby otrzymać sugestię 😊');
+    } else if (max === liczniki.dobrze) {
+      setDominanta('Zadowolona 😊');
+      setSugestiaTekst('Świetnie Ci idzie! Pielęgnuj to, co Cię uszczęśliwia 🌟');
+    } else if (max === liczniki.srednio) {
+      setDominanta('Obojętna 😐');
+      setSugestiaTekst('Spróbuj znaleźć coś drobnego, co wniesie radość do Twojego dnia 🌤️');
+    } else {
+      setDominanta('Niekoniecznie szczęśliwa 😞');
+      setSugestiaTekst('Może czas na rozmowę z kimś bliskim lub spacer? 🌱');
+    }
+  }, [wpisy]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.tytul}>Statystyki</Text>
-      <Text>😊 Pozytywne: {pozytywne}</Text>
-      <Text>😐 Neutralne: {neutralne}</Text>
-      <Text>😢/😡 Negatywne: {negatywne}</Text>
-      <Text>📋 Wszystkich wpisów: {wpisy.length}</Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.dominantaNaglowek}>Ogólnie jesteś:</Text>
+      <Text style={styles.dominanta}>{dominanta}</Text>
+
+      <View style={styles.statystykiBox}>
+        <Text style={styles.stat}>Dobrze: {podsumowanie.dobrze}</Text>
+        <Text style={styles.stat}>Tak sobie: {podsumowanie.srednio}</Text>
+        <Text style={styles.stat}>Źle: {podsumowanie.zle}</Text>
+      </View>
+
+      <View style={styles.poradaBox}>
+        <Text style={styles.poradaNaglowek}>Sugestia dla Ciebie:</Text>
+        <Text style={styles.porada}>{sugestiaTekst}</Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  tytul: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+  container: {
+    backgroundColor: '#FFF8F0',
+    padding: 24,
+    flexGrow: 1,
+  },
+  dominantaNaglowek: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  dominanta: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#E76617',
+    marginBottom: 20,
+  },
+  statystykiBox: {
+    backgroundColor: '#fdebd3',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  stat: {
+    fontSize: 18,
+    marginBottom: 8,
+    color: '#555',
+  },
+  poradaBox: {
+    backgroundColor: '#e0f7fa',
+    borderRadius: 12,
+    padding: 16,
+  },
+  poradaNaglowek: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    color: '#333',
+  },
+  porada: {
+    fontSize: 16,
+    color: '#333',
+  },
 });
