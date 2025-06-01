@@ -1,13 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Button,
   FlatList,
+  Image,
   Pressable,
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { useWpisy } from '../../konteksty/WpisyContext';
@@ -16,6 +17,15 @@ export default function StronaGlowna() {
   const router = useRouter();
   const { wpisy, odswiezWpisy } = useWpisy();
   const [refreshing, setRefreshing] = useState(false);
+  const [imie, setImie] = useState('');
+
+  useEffect(() => {
+    const pobierzImie = async () => {
+      const uzytkownik = await AsyncStorage.getItem('uzytkownik');
+      setImie(uzytkownik || 'Użytkowniku');
+    };
+    pobierzImie();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -34,17 +44,36 @@ export default function StronaGlowna() {
     router.replace('/logowanie');
   };
 
+  const dzisiejszyWpis = useMemo(() => {
+    const dzis = new Date().toDateString();
+    return wpisy.find((w) => new Date(w.data).toDateString() === dzis);
+  }, [wpisy]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.powitanie}>Cześć Klaudia, jak się dziś czujesz?</Text>
-
-      <View style={styles.dodajWpisBtn}>
-        <Button
-          title="Dodaj wpis"
-          onPress={() => router.push('/(tabs)/dodaj-wpis')}
-          color="#F7A072"
-        />
+      <View style={styles.headerRow}>
+        <Text style={styles.powitanie}>Cześć {imie}</Text>
+        <TouchableOpacity onPress={wyloguj}>
+          <Text style={styles.wylogujText}>Wyloguj</Text>
+        </TouchableOpacity>
       </View>
+
+      {dzisiejszyWpis ? (
+        <View style={styles.kartaDniaBox}>
+          <Text style={styles.kartaDniaTytul}>Dzisiejszy wpis:</Text>
+          <Text style={styles.kartaDniaTekst}>{dzisiejszyWpis.nastroj}</Text>
+          {dzisiejszyWpis.zdjecie && (
+            <Image
+              source={{ uri: dzisiejszyWpis.zdjecie }}
+              style={styles.kartaDniaZdjecie}
+            />
+          )}
+        </View>
+      ) : (
+        <TouchableOpacity style={styles.dodajKafel} onPress={() => router.push('/(tabs)/dodaj-wpis')}>
+          <Text style={styles.dodajKafelTekst}>Dodaj nowy wpis</Text>
+        </TouchableOpacity>
+      )}
 
       <Text style={styles.naglowek}>Twój dziennik nastrojów</Text>
 
@@ -57,6 +86,7 @@ export default function StronaGlowna() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           renderItem={({ item, index }) => (
             <Pressable
               onPress={() => router.push(`/wpis/${index}`)}
@@ -73,15 +103,22 @@ export default function StronaGlowna() {
                 })}
               </Text>
               <Text style={styles.opis}>Jak się czułaś: {item.nastroj}</Text>
-              <Text style={styles.kategoria}>Kategoria: {item.podsumowanie}</Text>
+              <Text
+                style={[styles.kategoria, {
+                  color:
+                    item.podsumowanie === 'Dobrze'
+                      ? 'green'
+                      : item.podsumowanie === 'Źle'
+                      ? 'red'
+                      : 'orange',
+                }]}
+              >
+                Kategoria: {item.podsumowanie}
+              </Text>
             </Pressable>
           )}
         />
       )}
-
-      <View style={styles.wylogujBtn}>
-        <Button title="Wyloguj się" onPress={wyloguj} color="#a33" />
-      </View>
     </View>
   );
 }
@@ -92,15 +129,58 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF8F0',
     padding: 16,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   powitanie: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#3F3F3F',
-    marginBottom: 16,
   },
-  dodajWpisBtn: {
+  wylogujText: {
+    color: '#a33',
+    fontWeight: 'bold',
+  },
+  dodajKafel: {
+    backgroundColor: '#F7A072',
+    padding: 16,
+    borderRadius: 12,
     marginBottom: 20,
-    alignSelf: 'flex-start',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  dodajKafelTekst: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  kartaDniaBox: {
+    backgroundColor: '#fdebd3',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 20,
+  },
+  kartaDniaTytul: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  kartaDniaTekst: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 8,
+  },
+  kartaDniaZdjecie: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
   },
   naglowek: {
     fontSize: 18,
@@ -116,7 +196,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0f7fa',
     padding: 14,
     borderRadius: 12,
-    marginBottom: 14,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -131,12 +210,7 @@ const styles = StyleSheet.create({
     color: '#444',
   },
   kategoria: {
-    color: '#777',
     marginTop: 4,
     fontStyle: 'italic',
-  },
-  wylogujBtn: {
-    marginTop: 20,
-    alignSelf: 'flex-start',
   },
 });

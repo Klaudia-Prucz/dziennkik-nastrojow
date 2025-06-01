@@ -2,13 +2,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Button,
   Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import Powiadomienie from '../../components/powiadomienie';
@@ -132,19 +132,18 @@ export default function DodajWpis() {
       />
 
       <Text style={styles.label}>Dodaj zdjęcie</Text>
-      <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
-        <Button title="Z galerii" onPress={wybierzZdjecie} color="#FAD6A5" />
-        <Button title="Zrób zdjęcie" onPress={zrobZdjecie} color="#FAD6A5" />
+      <View style={styles.zdjeciePrzyciskiBox}>
+        <TouchableOpacity onPress={wybierzZdjecie} style={styles.zdjeciePrzycisk}>
+          <Text style={styles.zdjeciePrzyciskText}>Z galerii</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={zrobZdjecie} style={styles.zdjeciePrzycisk}>
+          <Text style={styles.zdjeciePrzyciskText}>Zrób zdjęcie</Text>
+        </TouchableOpacity>
       </View>
       {zdjecie && (
         <Image
           source={{ uri: zdjecie }}
-          style={{
-            width: '100%',
-            height: 200,
-            borderRadius: 10,
-            marginBottom: 20,
-          }}
+          style={styles.zdjeciePodglad}
         />
       )}
 
@@ -173,9 +172,9 @@ export default function DodajWpis() {
         ))}
       </View>
 
-      <View style={styles.button}>
-        <Button title="Zapisz wpis" onPress={zapisz} color="#F7C8E0" />
-      </View>
+      <TouchableOpacity style={styles.zapiszPrzycisk} onPress={zapisz}>
+        <Text style={styles.zapiszPrzyciskText}>Zapisz wpis</Text>
+      </TouchableOpacity>
 
       <Powiadomienie
         visible={modalVisible}
@@ -207,6 +206,28 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlignVertical: 'top',
   },
+  zdjeciePrzyciskiBox: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  zdjeciePrzycisk: {
+    flex: 1,
+    backgroundColor: '#FAD6A5',
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  zdjeciePrzyciskText: {
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  zdjeciePodglad: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
   moodButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -227,7 +248,16 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: 'bold',
   },
-  button: {
+  zapiszPrzycisk: {
+    backgroundColor: '#F7C8E0',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
     marginTop: 10,
+  },
+  zapiszPrzyciskText: {
+    color: '#333',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
