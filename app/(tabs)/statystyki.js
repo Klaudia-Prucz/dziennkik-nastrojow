@@ -14,31 +14,48 @@ export default function Statystyki() {
 
   useEffect(() => {
     const liczniki = { dobrze: 0, srednio: 0, zle: 0 };
+
     wpisy.forEach((wpis) => {
       if (wpis.podsumowanie === 'Dobrze') liczniki.dobrze++;
       else if (wpis.podsumowanie === 'Tak sobie') liczniki.srednio++;
       else if (wpis.podsumowanie === 'Źle') liczniki.zle++;
     });
-    setPodsumowanie(liczniki);
 
     const max = Math.max(liczniki.dobrze, liczniki.srednio, liczniki.zle);
+
+    let nowaDominanta = '';
+    let nowaSugestia = '';
+
     if (max === 0) {
-      setDominanta('Brak danych');
-      setSugestiaTekst('Dodaj wpis, aby otrzymać sugestię 😊');
+      nowaDominanta = 'Brak danych';
+      nowaSugestia = 'Dodaj wpis, aby otrzymać sugestię 😊';
     } else if (max === liczniki.dobrze) {
-      setDominanta('Zadowolona 😊');
-      setSugestiaTekst(
-        'Świetnie Ci idzie! Pielęgnuj to, co Cię uszczęśliwia 🌟'
-      );
+      nowaDominanta = 'Zadowolona 😊';
+      nowaSugestia = 'Świetnie Ci idzie! Pielęgnuj to, co Cię uszczęśliwia 🌟';
     } else if (max === liczniki.srednio) {
-      setDominanta('Obojętna 😐');
-      setSugestiaTekst(
-        'Spróbuj znaleźć coś drobnego, co wniesie radość do Twojego dnia 🌤️'
-      );
+      nowaDominanta = 'Obojętna 😐';
+      nowaSugestia =
+        'Spróbuj znaleźć coś drobnego, co wniesie radość do Twojego dnia 🌤️';
     } else {
-      setDominanta('Niekoniecznie szczęśliwa 😞');
-      setSugestiaTekst('Może czas na rozmowę z kimś bliskim lub spacer? 🌱');
+      nowaDominanta = 'Niekoniecznie szczęśliwa 😞';
+      nowaSugestia = 'Może czas na rozmowę z kimś bliskim lub spacer? 🌱';
     }
+
+    setPodsumowanie((prev) => {
+      if (
+        prev.dobrze !== liczniki.dobrze ||
+        prev.srednio !== liczniki.srednio ||
+        prev.zle !== liczniki.zle
+      ) {
+        return liczniki;
+      }
+      return prev;
+    });
+
+    setDominanta((prev) => (prev !== nowaDominanta ? nowaDominanta : prev));
+    setSugestiaTekst((prev) =>
+      prev !== nowaSugestia ? nowaSugestia : prev
+    );
   }, [wpisy]);
 
   return (
