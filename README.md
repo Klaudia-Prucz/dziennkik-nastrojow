@@ -1,50 +1,83 @@
-# Welcome to your Expo app 👋
+# Dziennik Nastrojów
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> Prosta aplikacja mobilna do monitorowania codziennych nastrojów i planowania działań.
 
-## Get started
+## Opis projektu
 
-1. Install dependencies
+"Dziennik Nastrojów" to aplikacja mobilna stworzona w React Native z wykorzystaniem Expo Router, umożliwiająca:
 
-   ```bash
-   npm install
-   ```
+* codzienne dodawanie wpisów z oceną nastroju,
+* dołączanie notatek, planów oraz zdjęcia,
+* przeglądanie historii wpisów,
+* analizę nastroju w czasie,
+* sugestie na podstawie dominującego nastroju,
+* zabezpieczenie dostępu przez ekran logowania.
 
-2. Start the app
+## Funkcjonalności
 
-   ```bash
-   npx expo start
-   ```
+* [x] Logowanie (z wykorzystaniem `AsyncStorage`)
+* [x] Dodawanie wpisów z nastrojem, planem i notatką
+* [x] Dodawanie zdjęcia z galerii lub aparatu
+* [x] Historia wpisów i widok szczegółów
+* [x] Statystyki: dominanta nastroju i sugestia
+* [x] Komponent powiadomień modalnych
+* [x] Responsywny interfejs
 
-In the output, you'll find options to open the app in a
+## Stack technologiczny
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* React Native
+* Expo + Expo Router
+* JavaScript (ES6+)
+* AsyncStorage
+* Expo ImagePicker
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Struktura folderów
 
-## Get a fresh project
+```
+app/
+├── (tabs)/              # Nawigacja tabowa
+│   ├── strona-glowna.js
+│   ├── dodaj-wpis.js
+│   ├── statystyki.js
+│   └── wpis/[id].js     # Szczegóły wpisu
+├── logowanie.js           # Logowanie
+└── _layout.js             # Layout aplikacji
 
-When you're ready, run:
+components/
+├── powiadomienie.js        # Komponent modalny
 
-```bash
-npm run reset-project
+konteksty/
+└── WpisyContext.js         # Zarządzanie stanem wpisów
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Jak uruchomić projekt
 
-## Learn more
+1. Zainstaluj zależności:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm install
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+2. Uruchom aplikację:
 
-## Join the community
+```bash
+npx expo start
+```
 
-Join our community of developers creating universal apps.
+##  Autor
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Klaudia Pruczkowska
+Projekt na zaliczenie przedmiotu z programowania aplikacji mobilnych. 
+
+## Status projektu
+
+Projekt w trakcie realizacji. Ostatnia aktualizacja: **czerwiec 2025**.
+
+##  Plany rozwoju
+
+* [ ] Przechowywanie danych w chmurze (np. Firebase)
+* [ ] Ustawienia konta i edycja profilu
+* [ ] Przypomnienia o dodaniu wpisu
+
+##  Kontakt
+Masz pytania lub sugestie? Napisz na: **[klaudia.pruczkowska@wp.pl](mailto:klaudia.pruczkowska@wp.pl)**
