@@ -133,7 +133,10 @@ export default function DodajWpis() {
 
       <Text style={styles.label}>Dodaj zdjęcie</Text>
       <View style={styles.zdjeciePrzyciskiBox}>
-        <TouchableOpacity onPress={wybierzZdjecie} style={styles.zdjeciePrzycisk}>
+        <TouchableOpacity
+          onPress={wybierzZdjecie}
+          style={styles.zdjeciePrzycisk}
+        >
           <Text style={styles.zdjeciePrzyciskText}>Z galerii</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={zrobZdjecie} style={styles.zdjeciePrzycisk}>
@@ -141,10 +144,7 @@ export default function DodajWpis() {
         </TouchableOpacity>
       </View>
       {zdjecie && (
-        <Image
-          source={{ uri: zdjecie }}
-          style={styles.zdjeciePodglad}
-        />
+        <Image source={{ uri: zdjecie }} style={styles.zdjeciePodglad} />
       )}
 
       <Text style={styles.label}>Co zamierzasz dalej zrobić?</Text>

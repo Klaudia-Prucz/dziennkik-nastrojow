@@ -12,9 +12,7 @@ describe('Statystyki', () => {
 
     expect(getByText(/statystyki/i)).toBeTruthy();
 
- 
     expect(getByText(/liczba wpisów/i)).toBeTruthy();
-
 
     expect(getByText(/szczęśliwy/i)).toBeTruthy();
     expect(getByText(/smutny/i)).toBeTruthy();

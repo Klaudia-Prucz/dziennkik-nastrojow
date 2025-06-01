@@ -53,9 +53,7 @@ export default function Statystyki() {
     });
 
     setDominanta((prev) => (prev !== nowaDominanta ? nowaDominanta : prev));
-    setSugestiaTekst((prev) =>
-      prev !== nowaSugestia ? nowaSugestia : prev
-    );
+    setSugestiaTekst((prev) => (prev !== nowaSugestia ? nowaSugestia : prev));
   }, [wpisy]);
 
   return (

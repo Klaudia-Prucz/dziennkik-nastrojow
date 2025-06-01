@@ -1,5 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 const WpisyContext = createContext();
 
@@ -10,18 +16,16 @@ export const WpisyProvider = ({ children }) => {
     odswiezWpisy();
   }, []);
 
-
-const odswiezWpisy = useCallback(async () => {
-  try {
-    const dane = await AsyncStorage.getItem('wpisy');
-    if (dane) {
-      setWpisy(JSON.parse(dane));
+  const odswiezWpisy = useCallback(async () => {
+    try {
+      const dane = await AsyncStorage.getItem('wpisy');
+      if (dane) {
+        setWpisy(JSON.parse(dane));
+      }
+    } catch (err) {
+      console.error('Błąd przy odświeżaniu wpisów:', err);
     }
-  } catch (err) {
-    console.error('Błąd przy odświeżaniu wpisów:', err);
-  }
-}, []);
-
+  }, []);
 
   const zapiszWpis = async (nowy) => {
     try {

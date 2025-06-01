@@ -70,25 +70,27 @@ export default function StronaGlowna() {
             {dzisiejszyWpis ? (
               <View style={styles.kartaDniaBox}>
                 <Text style={styles.kartaDniaTytul}>Najnowszy wpis:</Text>
-                <Text style={styles.kartaDniaTekst}>{dzisiejszyWpis.nastroj}</Text>
+                <Text style={styles.kartaDniaTekst}>
+                  {dzisiejszyWpis.nastroj}
+                </Text>
                 {dzisiejszyWpis.zdjecie && (
                   <Image
-
-  source={{ uri: dzisiejszyWpis.zdjecie }}
-  style={{
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-    marginTop: 10,
-  }}
-  resizeMode="cover"
-/>
-
-
+                    source={{ uri: dzisiejszyWpis.zdjecie }}
+                    style={{
+                      width: '100%',
+                      height: 200,
+                      borderRadius: 10,
+                      marginTop: 10,
+                    }}
+                    resizeMode="cover"
+                  />
                 )}
               </View>
             ) : (
-              <TouchableOpacity style={styles.dodajKafel} onPress={() => router.push('/(tabs)/dodaj-wpis')}>
+              <TouchableOpacity
+                style={styles.dodajKafel}
+                onPress={() => router.push('/(tabs)/dodaj-wpis')}
+              >
                 <Text style={styles.dodajKafelTekst}>Dodaj nowy wpis</Text>
               </TouchableOpacity>
             )}
@@ -125,8 +127,8 @@ export default function StronaGlowna() {
                     item.podsumowanie === 'Dobrze'
                       ? 'green'
                       : item.podsumowanie === 'Źle'
-                      ? 'red'
-                      : 'orange',
+                        ? 'red'
+                        : 'orange',
                 },
               ]}
             >
