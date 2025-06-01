@@ -2,7 +2,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
   Button,
   Image,
   Pressable,
@@ -12,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Powiadomienie from '../../components/powiadomienie';
 import { useWpisy } from '../../konteksty/WpisyContext';
 
 const PODSUMOWANIE_NASTROJU = ['Dobrze', 'Tak sobie', 'Źle'];
@@ -23,13 +23,25 @@ export default function DodajWpis() {
   const [podsumowanie, setPodsumowanie] = useState('');
   const [zdjecie, setZdjecie] = useState(null);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState({
+    title: '',
+    message: '',
+    onConfirm: null,
+  });
+
   const { zapiszWpis } = useWpisy();
   const router = useRouter();
 
   const wybierzZdjecie = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Brak uprawnień', 'Musisz zezwolić na dostęp do galerii');
+      setModalContent({
+        title: 'Brak uprawnień',
+        message: 'Musisz zezwolić na dostęp do galerii',
+        onConfirm: () => setModalVisible(false),
+      });
+      setModalVisible(true);
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -44,7 +56,12 @@ export default function DodajWpis() {
   const zrobZdjecie = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Brak uprawnień', 'Musisz zezwolić na użycie aparatu');
+      setModalContent({
+        title: 'Brak uprawnień',
+        message: 'Musisz zezwolić na użycie aparatu',
+        onConfirm: () => setModalVisible(false),
+      });
+      setModalVisible(true);
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -57,7 +74,12 @@ export default function DodajWpis() {
 
   const zapisz = async () => {
     if (!nastroj.trim()) {
-      Alert.alert('Uwaga', 'Wpisz jak się czujesz');
+      setModalContent({
+        title: 'Uwaga',
+        message: 'Wpisz jak się czujesz',
+        onConfirm: () => setModalVisible(false),
+      });
+      setModalVisible(true);
       return;
     }
 
@@ -72,13 +94,21 @@ export default function DodajWpis() {
 
     await zapiszWpis(wpis);
 
-    Alert.alert('Zapisano', 'Twój wpis został dodany');
     setNastroj('');
     setNotatka('');
     setPlan('');
     setPodsumowanie('');
     setZdjecie(null);
-    router.replace('/(tabs)/strona-glowna');
+
+    setModalContent({
+      title: 'Zapisano',
+      message: 'Twój wpis został dodany!',
+      onConfirm: () => {
+        setModalVisible(false);
+        router.replace('/(tabs)/strona-glowna');
+      },
+    });
+    setModalVisible(true);
   };
 
   return (
@@ -117,6 +147,7 @@ export default function DodajWpis() {
           }}
         />
       )}
+
       <Text style={styles.label}>Co zamierzasz dalej zrobić?</Text>
       <TextInput
         style={styles.input}
@@ -145,6 +176,13 @@ export default function DodajWpis() {
       <View style={styles.button}>
         <Button title="Zapisz wpis" onPress={zapisz} color="#F7C8E0" />
       </View>
+
+      <Powiadomienie
+        visible={modalVisible}
+        title={modalContent.title}
+        message={modalContent.message}
+        onConfirm={modalContent.onConfirm}
+      />
     </ScrollView>
   );
 }
