@@ -1,6 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -19,13 +18,6 @@ export default function StronaGlowna() {
   const [refreshing, setRefreshing] = useState(false);
   const [imie, setImie] = useState('');
 
-  useEffect(() => {
-    const pobierzImie = async () => {
-      const uzytkownik = await AsyncStorage.getItem('uzytkownik');
-      setImie(uzytkownik || 'Użytkowniku');
-    };
-    pobierzImie();
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -39,10 +31,17 @@ export default function StronaGlowna() {
     setRefreshing(false);
   };
 
-  const wyloguj = async () => {
+const wyloguj = async () => {
+  const auth = getAuth();
+  try {
+    await signOut(auth); 
     await AsyncStorage.removeItem('zalogowany');
+    await AsyncStorage.removeItem('uzytkownik');
     router.replace('/logowanie');
-  };
+  } catch (error) {
+    console.error('Błąd przy wylogowywaniu:', error);
+  }
+};
 
   const dzisiejszyWpis = useMemo(() => {
     const dzis = new Date().toDateString();

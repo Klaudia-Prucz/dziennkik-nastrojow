@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -10,24 +10,26 @@ import {
   TextInput,
   TouchableOpacity
 } from 'react-native';
+import { auth } from '../firebaseConfig';
+
 
 export default function Logowanie() {
   const [email, setEmail] = useState('');
   const [haslo, setHaslo] = useState('');
   const [blad, setBlad] = useState(null);
 
-  const router = useRouter();
 
-  const zaloguj = async () => {
-    setBlad(null);
-    const auth = getAuth();
-    try {
-      await signInWithEmailAndPassword(auth, email, haslo);
-      router.replace('/(tabs)/strona-glowna');
-    } catch (error) {
-      setBlad('Logowanie nie powiodło się: ' + error.message);
-    }
-  };
+  const router = useRouter();
+const zaloguj = async () => {
+  setBlad(null);
+  try {
+    await signInWithEmailAndPassword(auth, email, haslo);
+    router.replace('/(tabs)/strona-glowna');
+  } catch (error) {
+    setBlad('Logowanie nie powiodło się: ' + error.message);
+  }
+};
+
 
   return (
     <SafeAreaView style={style.container}>

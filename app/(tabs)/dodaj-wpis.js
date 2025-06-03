@@ -11,8 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { v4 as uuidv4 } from 'uuid';
 import Powiadomienie from '../../components/powiadomienie';
 import { useWpisy } from '../../konteksty/WpisyContext';
+import { uploadZdjecie } from '../../utils/uploadZdjecie'; // dopasuj ścieżkę
 
 const PODSUMOWANIE_NASTROJU = ['Dobrze', 'Tak sobie', 'Źle'];
 
@@ -73,10 +75,7 @@ export default function DodajWpis() {
   };
 
   const zapisz = async () => {
-    console.log('Kliknięto Zapisz');
-
     if (!nastroj.trim()) {
-      console.log('Brak nastroju – przerywam');
       setModalContent({
         title: 'Uwaga',
         message: 'Wpisz jak się czujesz',
@@ -86,35 +85,26 @@ export default function DodajWpis() {
       return;
     }
 
-    const id =
-      Date.now().toString() +
-      Math.random().toString(36).substring(2, 9);
+    let zdjecieURL = null;
+    if (zdjecie) {
+      try {
+        zdjecieURL = await uploadZdjecie(zdjecie);
+      } catch (error) {
+        console.error('Błąd przy wysyłaniu zdjęcia:', error);
+      }
+    }
 
     const wpis = {
-      id,
+      id: uuidv4(),
       nastroj,
       notatka,
       plan,
       podsumowanie,
       data: new Date().toISOString(),
-      zdjecie,
+      zdjecie: zdjecieURL,
     };
 
-    console.log('Wpis do zapisania:', wpis);
-
-    try {
-      await zapiszWpis(wpis);
-      console.log('Wpis zapisany pomyślnie');
-    } catch (err) {
-      console.error('Błąd przy zapisie wpisu:', err);
-      setModalContent({
-        title: 'Błąd',
-        message: 'Nie udało się zapisać wpisu. Spróbuj ponownie.',
-        onConfirm: () => setModalVisible(false),
-      });
-      setModalVisible(true);
-      return;
-    }
+    await zapiszWpis(wpis);
 
     setNastroj('');
     setNotatka('');
