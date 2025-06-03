@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -8,37 +8,36 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
+import { auth } from '../firebaseConfig';
 
-export default function Logowanie() {
+export default function Rejestracja() {
   const [email, setEmail] = useState('');
   const [haslo, setHaslo] = useState('');
   const [blad, setBlad] = useState(null);
-
   const router = useRouter();
 
-  const zaloguj = async () => {
+  const zarejestruj = async () => {
     setBlad(null);
-    const auth = getAuth();
     try {
-      await signInWithEmailAndPassword(auth, email, haslo);
+      await createUserWithEmailAndPassword(auth, email, haslo);
       router.replace('/(tabs)/strona-glowna');
     } catch (error) {
-      setBlad('Logowanie nie powiodło się: ' + error.message);
+      setBlad('Rejestracja nie powiodła się: ' + error.message);
     }
   };
 
   return (
-    <SafeAreaView style={style.container}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={style.inner}
+        style={styles.inner}
       >
-        <Text style={style.tytul}>Witaj ponownie!</Text>
+        <Text style={styles.tytul}>Załóż konto</Text>
 
         <TextInput
-          style={style.input}
+          style={styles.input}
           placeholder="Email"
           placeholderTextColor="#888"
           value={email}
@@ -48,7 +47,7 @@ export default function Logowanie() {
         />
 
         <TextInput
-          style={style.input}
+          style={styles.input}
           placeholder="Hasło"
           placeholderTextColor="#888"
           secureTextEntry
@@ -56,32 +55,32 @@ export default function Logowanie() {
           onChangeText={setHaslo}
         />
 
-        {blad && <Text style={style.blad}>{blad}</Text>}
+        {blad && <Text style={styles.blad}>{blad}</Text>}
 
-        <TouchableOpacity style={style.przycisk} onPress={zaloguj}>
-          <Text style={style.przyciskText}>Zaloguj się</Text>
+        <TouchableOpacity style={styles.przycisk} onPress={zarejestruj}>
+          <Text style={styles.przyciskText}>Zarejestruj się</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={style.linkButton}
-          onPress={() => router.push('/rejestracja')}
+          onPress={() => router.push('/logowanie')}
+          style={styles.linkButton}
         >
-          <Text style={style.linkText}>lub zarejestruj się</Text>
+          <Text style={styles.linkText}>lub zaloguj się</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF8F0',
   },
   inner: {
-    flex: 1,
     justifyContent: 'center',
     padding: 32,
+    flex: 1,
   },
   tytul: {
     fontSize: 26,

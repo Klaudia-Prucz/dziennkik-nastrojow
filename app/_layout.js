@@ -1,5 +1,7 @@
 import { Stack } from 'expo-router';
 import { WpisyProvider } from '../konteksty/WpisyContext';
+import '../firebaseConfig';
+
 
 export default function RootLayout() {
   return (
@@ -7,6 +9,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="logowanie" />
+        <Stack.Screen name="rejestracja" />
       </Stack>
     </WpisyProvider>
   );
