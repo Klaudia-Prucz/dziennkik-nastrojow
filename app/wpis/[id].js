@@ -16,7 +16,7 @@ export default function SzczegolyWpisu() {
   const router = useRouter();
   const { wpisy } = useWpisy();
 
-  const wpis = wpisy[parseInt(id)];
+  const wpis = wpisy.find((w) => w.id === id);
 
   if (!wpis) {
     return (

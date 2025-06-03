@@ -73,7 +73,10 @@ export default function DodajWpis() {
   };
 
   const zapisz = async () => {
+    console.log('Kliknięto Zapisz');
+
     if (!nastroj.trim()) {
+      console.log('Brak nastroju – przerywam');
       setModalContent({
         title: 'Uwaga',
         message: 'Wpisz jak się czujesz',
@@ -83,7 +86,12 @@ export default function DodajWpis() {
       return;
     }
 
+    const id =
+      Date.now().toString() +
+      Math.random().toString(36).substring(2, 9);
+
     const wpis = {
+      id,
       nastroj,
       notatka,
       plan,
@@ -92,7 +100,21 @@ export default function DodajWpis() {
       zdjecie,
     };
 
-    await zapiszWpis(wpis);
+    console.log('Wpis do zapisania:', wpis);
+
+    try {
+      await zapiszWpis(wpis);
+      console.log('Wpis zapisany pomyślnie');
+    } catch (err) {
+      console.error('Błąd przy zapisie wpisu:', err);
+      setModalContent({
+        title: 'Błąd',
+        message: 'Nie udało się zapisać wpisu. Spróbuj ponownie.',
+        onConfirm: () => setModalVisible(false),
+      });
+      setModalVisible(true);
+      return;
+    }
 
     setNastroj('');
     setNotatka('');

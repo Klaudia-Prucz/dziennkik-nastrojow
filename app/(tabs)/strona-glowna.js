@@ -53,7 +53,7 @@ export default function StronaGlowna() {
     <View style={styles.container}>
       <FlatList
         data={wpisy}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -105,7 +105,7 @@ export default function StronaGlowna() {
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item, index }) => (
           <Pressable
-            onPress={() => router.push(`/wpis/${index}`)}
+            onPress={() => router.push(`/wpis/${item.id}`)}
             style={styles.wpis}
           >
             <Text style={styles.data}>

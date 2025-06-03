@@ -37,8 +37,18 @@ export const WpisyProvider = ({ children }) => {
     }
   };
 
+  const usunWpis = async (id) => {
+    try {
+      const noweWpisy = wpisy.filter((w) => w.id !== id);
+      setWpisy(noweWpisy);
+      await AsyncStorage.setItem('wpisy', JSON.stringify(noweWpisy));
+    } catch (err) {
+      console.error('Błąd przy usuwaniu wpisu:', err);
+    }
+  };
+
   return (
-    <WpisyContext.Provider value={{ wpisy, zapiszWpis, odswiezWpisy }}>
+    <WpisyContext.Provider value={{ wpisy, zapiszWpis, odswiezWpisy, usunWpis }}>
       {children}
     </WpisyContext.Provider>
   );
