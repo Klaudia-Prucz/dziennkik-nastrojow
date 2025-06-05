@@ -12,7 +12,6 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    // Można tutaj dodać sprawdzanie zalogowania, jeśli potrzebne
   }, []);
 
   return (

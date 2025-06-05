@@ -1,4 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { getAuth, signOut } from 'firebase/auth';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
@@ -37,7 +39,7 @@ const wyloguj = async () => {
     await signOut(auth); 
     await AsyncStorage.removeItem('zalogowany');
     await AsyncStorage.removeItem('uzytkownik');
-    router.replace('/logowanie');
+    router.push('../../logowanie');
   } catch (error) {
     console.error('Błąd przy wylogowywaniu:', error);
   }
