@@ -2,34 +2,33 @@ import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
 import { auth } from '../firebaseConfig';
-
 
 export default function Logowanie() {
   const [email, setEmail] = useState('');
   const [haslo, setHaslo] = useState('');
   const [blad, setBlad] = useState(null);
 
-
   const router = useRouter();
-const zaloguj = async () => {
-  setBlad(null);
-  try {
-    await signInWithEmailAndPassword(auth, email, haslo);
-    router.replace('/(tabs)/strona-glowna');
-  } catch (error) {
-    setBlad('Logowanie nie powiodło się: ' + error.message);
-  }
-};
 
+  const zaloguj = async () => {
+    setBlad(null);
+    try {
+      await signInWithEmailAndPassword(auth, email, haslo);
+      router.replace('/(tabs)/strona-glowna');
+    } catch (error) {
+      setBlad('Logowanie nie powiodło się: ' + error.message);
+    }
+  };
 
   return (
     <SafeAreaView style={style.container}>
@@ -37,6 +36,11 @@ const zaloguj = async () => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={style.inner}
       >
+        <Image
+          source={require('../assets/images/beztla.png')}
+          style={style.logo}
+        />
+
         <Text style={style.tytul}>Witaj ponownie!</Text>
 
         <TextInput
@@ -84,6 +88,13 @@ const style = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 32,
+  },
+  logo: {
+    width: 180,
+    height: 180,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 10,
   },
   tytul: {
     fontSize: 26,

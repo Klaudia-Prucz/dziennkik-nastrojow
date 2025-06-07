@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -34,6 +35,11 @@ export default function Rejestracja() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.inner}
       >
+        <Image
+          source={require('../assets/images/beztla.png')}
+          style={styles.logo}
+        />
+
         <Text style={styles.tytul}>Załóż konto</Text>
 
         <TextInput
@@ -81,6 +87,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 32,
     flex: 1,
+  },
+  logo: {
+    width: 180,
+    height: 180,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 10,
   },
   tytul: {
     fontSize: 26,

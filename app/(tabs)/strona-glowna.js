@@ -44,21 +44,16 @@ export default function StronaGlowna() {
         console.warn('Brak zgody na lokalizację');
         return null;
       }
-
       const location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
-
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=pl&appid=${API_KEY}`
       );
-
       const data = await response.json();
-
       if (!data || !data.main || !data.weather || data.cod !== 200) {
         console.warn('Niepoprawne dane z API pogody', data);
         return null;
       }
-
       return {
         temperatura: data.main.temp,
         opis: data.weather[0].description,
@@ -82,15 +77,20 @@ export default function StronaGlowna() {
     }
   };
 
+  const dzisiaj = new Date().toDateString();
+
   const dzisiejszyWpis = useMemo(() => {
-    const dzis = new Date().toDateString();
-    return wpisy.find((w) => new Date(w.data).toDateString() === dzis);
+    return wpisy.find((w) => new Date(w.data).toDateString() === dzisiaj);
+  }, [wpisy]);
+
+  const starszeWpisy = useMemo(() => {
+    return wpisy.filter((w) => new Date(w.data).toDateString() !== dzisiaj);
   }, [wpisy]);
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={wpisy}
+        data={starszeWpisy}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
@@ -141,10 +141,10 @@ export default function StronaGlowna() {
               </TouchableOpacity>
             )}
 
-            <Text style={styles.naglowek}>Twój dziennik nastrojów</Text>
+            <Text style={styles.naglowek}>Poprzednie wpisy</Text>
 
-            {wpisy.length === 0 && (
-              <Text style={styles.brak}>Brak wpisów. Dodaj pierwszy!</Text>
+            {starszeWpisy.length === 0 && (
+              <Text style={styles.brak}>Brak wcześniejszych wpisów.</Text>
             )}
           </View>
         }
@@ -154,32 +154,38 @@ export default function StronaGlowna() {
             onPress={() => router.push(`/wpis/${item.id}`)}
             style={styles.wpis}
           >
-            <Text style={styles.data}>
-              {new Date(item.data).toLocaleString('pl-PL', {
-                weekday: 'long',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
-            <Text style={styles.opis}>Jak się czułaś: {item.nastroj}</Text>
-            <Text
-              style={[
-                styles.kategoria,
-                {
-                  color:
-                    item.podsumowanie === 'Dobrze'
-                      ? 'green'
-                      : item.podsumowanie === 'Źle'
-                      ? 'red'
-                      : 'orange',
-                },
-              ]}
-            >
-              Kategoria: {item.podsumowanie}
-            </Text>
+            <View style={styles.wpisTop}>
+              <Text style={styles.data}>
+                {new Date(item.data).toLocaleDateString('pl-PL', {
+                  weekday: 'short',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                })}
+              </Text>
+              <Text
+                style={[
+                  styles.statusBadge,
+                  item.podsumowanie === 'Dobrze'
+                    ? styles.dobrze
+                    : item.podsumowanie === 'Źle'
+                    ? styles.zle
+                    : styles.srednio,
+                ]}
+              >
+                {item.podsumowanie}
+              </Text>
+            </View>
+
+            <Text style={styles.nastrojTekst}>Nastrój: {item.nastroj}</Text>
+
+            {item.zdjecie && (
+              <Image
+                source={{ uri: item.zdjecie }}
+                style={styles.wpisMiniatura}
+                resizeMode="cover"
+              />
+            )}
           </Pressable>
         )}
       />
@@ -260,17 +266,44 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  wpisTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    fontWeight: 'bold',
+    fontSize: 12,
+    color: '#fff',
+    overflow: 'hidden',
+  },
+  dobrze: {
+    backgroundColor: 'green',
+  },
+  zle: {
+    backgroundColor: 'red',
+  },
+  srednio: {
+    backgroundColor: 'orange',
+  },
   data: {
     fontWeight: 'bold',
     color: '#a0522d',
-    marginBottom: 4,
   },
-  opis: {
-    color: '#444',
+  nastrojTekst: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 6,
   },
-  kategoria: {
-    marginTop: 4,
-    fontStyle: 'italic',
+  wpisMiniatura: {
+    width: '100%',
+    height: 160,
+    borderRadius: 8,
+    marginTop: 6,
   },
   pogodaBox: {
     backgroundColor: '#E0F7FA',
