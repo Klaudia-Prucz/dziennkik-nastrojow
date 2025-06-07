@@ -14,7 +14,6 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import Powiadomienie from '../../components/powiadomienie';
 import { useWpisy } from '../../konteksty/WpisyContext';
-import { uploadZdjecie } from '../../utils/uploadZdjecie'; // dopasuj ścieżkę
 
 const PODSUMOWANIE_NASTROJU = ['Dobrze', 'Tak sobie', 'Źle'];
 
@@ -85,15 +84,6 @@ export default function DodajWpis() {
       return;
     }
 
-    let zdjecieURL = null;
-    if (zdjecie) {
-      try {
-        zdjecieURL = await uploadZdjecie(zdjecie);
-      } catch (error) {
-        console.error('Błąd przy wysyłaniu zdjęcia:', error);
-      }
-    }
-
     const wpis = {
       id: uuidv4(),
       nastroj,
@@ -101,7 +91,7 @@ export default function DodajWpis() {
       plan,
       podsumowanie,
       data: new Date().toISOString(),
-      zdjecie: zdjecieURL,
+      zdjecie,
     };
 
     await zapiszWpis(wpis);
@@ -145,19 +135,14 @@ export default function DodajWpis() {
 
       <Text style={styles.label}>Dodaj zdjęcie</Text>
       <View style={styles.zdjeciePrzyciskiBox}>
-        <TouchableOpacity
-          onPress={wybierzZdjecie}
-          style={styles.zdjeciePrzycisk}
-        >
+        <TouchableOpacity onPress={wybierzZdjecie} style={styles.zdjeciePrzycisk}>
           <Text style={styles.zdjeciePrzyciskText}>Z galerii</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={zrobZdjecie} style={styles.zdjeciePrzycisk}>
           <Text style={styles.zdjeciePrzyciskText}>Zrób zdjęcie</Text>
         </TouchableOpacity>
       </View>
-      {zdjecie && (
-        <Image source={{ uri: zdjecie }} style={styles.zdjeciePodglad} />
-      )}
+      {zdjecie && <Image source={{ uri: zdjecie }} style={styles.zdjeciePodglad} />}
 
       <Text style={styles.label}>Co zamierzasz dalej zrobić?</Text>
       <TextInput
@@ -173,10 +158,7 @@ export default function DodajWpis() {
         {PODSUMOWANIE_NASTROJU.map((item) => (
           <Pressable
             key={item}
-            style={[
-              styles.moodButton,
-              podsumowanie === item && styles.moodButtonSelected,
-            ]}
+            style={[styles.moodButton, podsumowanie === item && styles.moodButtonSelected]}
             onPress={() => setPodsumowanie(item)}
           >
             <Text style={styles.moodButtonText}>{item}</Text>

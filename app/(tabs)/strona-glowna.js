@@ -1,3 +1,4 @@
+import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
@@ -19,11 +20,14 @@ export default function StronaGlowna() {
   const { wpisy, odswiezWpisy } = useWpisy();
   const [refreshing, setRefreshing] = useState(false);
   const [imie, setImie] = useState('');
+  const [pogoda, setPogoda] = useState(null);
 
+  const API_KEY = '66ba41065d9f6b98d101b71a13a0ca4d';
 
   useFocusEffect(
     useCallback(() => {
       odswiezWpisy?.();
+      pobierzPogode().then(setPogoda);
     }, [odswiezWpisy])
   );
 
@@ -33,17 +37,50 @@ export default function StronaGlowna() {
     setRefreshing(false);
   };
 
-const wyloguj = async () => {
-  const auth = getAuth();
-  try {
-    await signOut(auth); 
-    await AsyncStorage.removeItem('zalogowany');
-    await AsyncStorage.removeItem('uzytkownik');
-    router.push('../../logowanie');
-  } catch (error) {
-    console.error('Błąd przy wylogowywaniu:', error);
-  }
-};
+  const pobierzPogode = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Brak zgody na lokalizację');
+        return null;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=pl&appid=${API_KEY}`
+      );
+
+      const data = await response.json();
+
+      if (!data || !data.main || !data.weather || data.cod !== 200) {
+        console.warn('Niepoprawne dane z API pogody', data);
+        return null;
+      }
+
+      return {
+        temperatura: data.main.temp,
+        opis: data.weather[0].description,
+        lokalizacja: data.name,
+      };
+    } catch (error) {
+      console.error('Błąd pobierania pogody:', error);
+      return null;
+    }
+  };
+
+  const wyloguj = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      await AsyncStorage.removeItem('zalogowany');
+      await AsyncStorage.removeItem('uzytkownik');
+      router.push('../../logowanie');
+    } catch (error) {
+      console.error('Błąd przy wylogowywaniu:', error);
+    }
+  };
 
   const dzisiejszyWpis = useMemo(() => {
     const dzis = new Date().toDateString();
@@ -67,6 +104,14 @@ const wyloguj = async () => {
                 <Text style={styles.wylogujText}>Wyloguj</Text>
               </TouchableOpacity>
             </View>
+
+            {pogoda && (
+              <View style={styles.pogodaBox}>
+                <Text style={styles.pogodaText}>
+                  🌤️ Pogoda: {pogoda.temperatura}°C, {pogoda.opis} ({pogoda.lokalizacja})
+                </Text>
+              </View>
+            )}
 
             {dzisiejszyWpis ? (
               <View style={styles.kartaDniaBox}>
@@ -104,7 +149,7 @@ const wyloguj = async () => {
           </View>
         }
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <Pressable
             onPress={() => router.push(`/wpis/${item.id}`)}
             style={styles.wpis}
@@ -128,8 +173,8 @@ const wyloguj = async () => {
                     item.podsumowanie === 'Dobrze'
                       ? 'green'
                       : item.podsumowanie === 'Źle'
-                        ? 'red'
-                        : 'orange',
+                      ? 'red'
+                      : 'orange',
                 },
               ]}
             >
@@ -226,5 +271,15 @@ const styles = StyleSheet.create({
   kategoria: {
     marginTop: 4,
     fontStyle: 'italic',
+  },
+  pogodaBox: {
+    backgroundColor: '#E0F7FA',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 16,
+  },
+  pogodaText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
