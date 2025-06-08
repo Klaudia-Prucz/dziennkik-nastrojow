@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useWpisy } from '../../konteksty/WpisyContext';
+import { supabase } from '../../supabaseClient';
 
 export default function Statystyki() {
-  const { wpisy } = useWpisy();
+  const [wpisy, setWpisy] = useState([]);
   const [podsumowanie, setPodsumowanie] = useState({
     dobrze: 0,
     srednio: 0,
@@ -13,12 +13,28 @@ export default function Statystyki() {
   const [sugestiaTekst, setSugestiaTekst] = useState('');
 
   useEffect(() => {
+    const pobierzWpisy = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) return;
+
+      const { data, error } = await supabase
+        .from('entries')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (!error) setWpisy(data);
+    };
+
+    pobierzWpisy();
+  }, []);
+
+  useEffect(() => {
     const liczniki = { dobrze: 0, srednio: 0, zle: 0 };
 
     wpisy.forEach((wpis) => {
-      if (wpis.podsumowanie === 'Dobrze') liczniki.dobrze++;
-      else if (wpis.podsumowanie === 'Tak sobie') liczniki.srednio++;
-      else if (wpis.podsumowanie === 'Źle') liczniki.zle++;
+      if (wpis.summary === 'Dobrze') liczniki.dobrze++;
+      else if (wpis.summary === 'Tak sobie') liczniki.srednio++;
+      else if (wpis.summary === 'Źle') liczniki.zle++;
     });
 
     const max = Math.max(liczniki.dobrze, liczniki.srednio, liczniki.zle);
@@ -34,8 +50,7 @@ export default function Statystyki() {
       nowaSugestia = 'Świetnie Ci idzie! Pielęgnuj to, co Cię uszczęśliwia 🌟';
     } else if (max === liczniki.srednio) {
       nowaDominanta = 'Obojętna 😐';
-      nowaSugestia =
-        'Spróbuj znaleźć coś drobnego, co wniesie radość do Twojego dnia 🌤️';
+      nowaSugestia = 'Spróbuj znaleźć coś drobnego, co wniesie radość do Twojego dnia 🌤️';
     } else {
       nowaDominanta = 'Niekoniecznie szczęśliwa 😞';
       nowaSugestia = 'Może czas na rozmowę z kimś bliskim lub spacer? 🌱';
