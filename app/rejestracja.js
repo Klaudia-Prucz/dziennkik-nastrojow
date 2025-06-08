@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
   Image,
@@ -11,7 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import { auth } from '../firebaseConfig';
+import { supabase } from '../supabaseClient';
 
 export default function Rejestracja() {
   const [email, setEmail] = useState('');
@@ -21,11 +20,15 @@ export default function Rejestracja() {
 
   const zarejestruj = async () => {
     setBlad(null);
-    try {
-      await createUserWithEmailAndPassword(auth, email, haslo);
-      router.replace('/(tabs)/strona-glowna');
-    } catch (error) {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password: haslo,
+    });
+
+    if (error) {
       setBlad('Rejestracja nie powiodła się: ' + error.message);
+    } else {
+      router.replace('/logowanie'); // albo /strona-glowna jeśli bez weryfikacji
     }
   };
 

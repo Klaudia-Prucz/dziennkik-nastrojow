@@ -11,9 +11,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '../../supabaseClient';
+import { uploadZdjecieDoSupabase } from '../../utils/storage';
 import Powiadomienie from '../../components/powiadomienie';
-import { useWpisy } from '../../konteksty/WpisyContext';
 
 const PODSUMOWANIE_NASTROJU = ['Dobrze', 'Tak sobie', 'Źle'];
 
@@ -31,7 +31,6 @@ export default function DodajWpis() {
     onConfirm: null,
   });
 
-  const { zapiszWpis } = useWpisy();
   const router = useRouter();
 
   const wybierzZdjecie = async () => {
@@ -84,17 +83,43 @@ export default function DodajWpis() {
       return;
     }
 
-    const wpis = {
-      id: uuidv4(),
-      nastroj,
-      notatka,
-      plan,
-      podsumowanie,
-      data: new Date().toISOString(),
-      zdjecie,
-    };
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (!user || userError) {
+      setModalContent({
+        title: 'Błąd',
+        message: 'Nie udało się ustalić użytkownika. Spróbuj ponownie.',
+        onConfirm: () => setModalVisible(false),
+      });
+      setModalVisible(true);
+      return;
+    }
 
-    await zapiszWpis(wpis);
+    let imageUrl = null;
+    if (zdjecie) {
+      imageUrl = await uploadZdjecieDoSupabase(zdjecie, user.id);
+    }
+
+    const { error } = await supabase.from('entries').insert([
+      {
+        mood: nastroj,
+        note: notatka,
+        plan,
+        summary: podsumowanie,
+        date: new Date().toISOString(),
+        image_url: imageUrl,
+        user_id: user.id,
+      },
+    ]);
+
+    if (error) {
+      setModalContent({
+        title: 'Błąd zapisu',
+        message: error.message,
+        onConfirm: () => setModalVisible(false),
+      });
+      setModalVisible(true);
+      return;
+    }
 
     setNastroj('');
     setNotatka('');

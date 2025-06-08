@@ -1,7 +1,6 @@
 import * as Location from 'expo-location';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { getAuth, signOut } from 'firebase/auth';
+import { supabase } from '../../supabaseClient';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
@@ -13,27 +12,39 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useWpisy } from '../../konteksty/WpisyContext';
 
 export default function StronaGlowna() {
   const router = useRouter();
-  const { wpisy, odswiezWpisy } = useWpisy();
+  const [wpisy, setWpisy] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [imie, setImie] = useState('');
   const [pogoda, setPogoda] = useState(null);
 
   const API_KEY = '66ba41065d9f6b98d101b71a13a0ca4d';
 
+  const pobierzWpisy = async () => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (!user || userError) return;
+
+    const { data, error } = await supabase
+      .from('entries')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false });
+
+    if (!error) setWpisy(data || []);
+    else console.error('Błąd pobierania wpisów:', error.message);
+  };
+
   useFocusEffect(
     useCallback(() => {
-      odswiezWpisy?.();
+      pobierzWpisy();
       pobierzPogode().then(setPogoda);
-    }, [odswiezWpisy])
+    }, [])
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await odswiezWpisy?.();
+    await pobierzWpisy();
     setRefreshing(false);
   };
 
@@ -66,12 +77,9 @@ export default function StronaGlowna() {
   };
 
   const wyloguj = async () => {
-    const auth = getAuth();
     try {
-      await signOut(auth);
-      await AsyncStorage.removeItem('zalogowany');
-      await AsyncStorage.removeItem('uzytkownik');
-      router.push('../../logowanie');
+      await supabase.auth.signOut();
+      router.push('/logowanie');
     } catch (error) {
       console.error('Błąd przy wylogowywaniu:', error);
     }
@@ -80,11 +88,11 @@ export default function StronaGlowna() {
   const dzisiaj = new Date().toDateString();
 
   const dzisiejszyWpis = useMemo(() => {
-    return wpisy.find((w) => new Date(w.data).toDateString() === dzisiaj);
+    return wpisy.find((w) => new Date(w.date).toDateString() === dzisiaj);
   }, [wpisy]);
 
   const starszeWpisy = useMemo(() => {
-    return wpisy.filter((w) => new Date(w.data).toDateString() !== dzisiaj);
+    return wpisy.filter((w) => new Date(w.date).toDateString() !== dzisiaj);
   }, [wpisy]);
 
   return (
@@ -99,7 +107,7 @@ export default function StronaGlowna() {
         ListHeaderComponent={
           <View>
             <View style={styles.headerRow}>
-              <Text style={styles.powitanie}>Cześć {imie}</Text>
+              <Text style={styles.powitanie}>Cześć!</Text>
               <TouchableOpacity onPress={wyloguj}>
                 <Text style={styles.wylogujText}>Wyloguj</Text>
               </TouchableOpacity>
@@ -117,11 +125,11 @@ export default function StronaGlowna() {
               <View style={styles.kartaDniaBox}>
                 <Text style={styles.kartaDniaTytul}>Najnowszy wpis:</Text>
                 <Text style={styles.kartaDniaTekst}>
-                  {dzisiejszyWpis.nastroj}
+                  {dzisiejszyWpis.mood}
                 </Text>
-                {dzisiejszyWpis.zdjecie && (
+                {dzisiejszyWpis.image_url && (
                   <Image
-                    source={{ uri: dzisiejszyWpis.zdjecie }}
+                    source={{ uri: dzisiejszyWpis.image_url }}
                     style={{
                       width: '100%',
                       height: 200,
@@ -156,7 +164,7 @@ export default function StronaGlowna() {
           >
             <View style={styles.wpisTop}>
               <Text style={styles.data}>
-                {new Date(item.data).toLocaleDateString('pl-PL', {
+                {new Date(item.date).toLocaleDateString('pl-PL', {
                   weekday: 'short',
                   day: '2-digit',
                   month: '2-digit',
@@ -166,22 +174,22 @@ export default function StronaGlowna() {
               <Text
                 style={[
                   styles.statusBadge,
-                  item.podsumowanie === 'Dobrze'
+                  item.summary === 'Dobrze'
                     ? styles.dobrze
-                    : item.podsumowanie === 'Źle'
+                    : item.summary === 'Źle'
                     ? styles.zle
                     : styles.srednio,
                 ]}
               >
-                {item.podsumowanie}
+                {item.summary}
               </Text>
             </View>
 
-            <Text style={styles.nastrojTekst}>Nastrój: {item.nastroj}</Text>
+            <Text style={styles.nastrojTekst}>Nastrój: {item.mood}</Text>
 
-            {item.zdjecie && (
+            {item.image_url && (
               <Image
-                source={{ uri: item.zdjecie }}
+                source={{ uri: item.image_url }}
                 style={styles.wpisMiniatura}
                 resizeMode="cover"
               />

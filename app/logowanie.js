@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
   Image,
@@ -11,7 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import { auth } from '../firebaseConfig';
+import { supabase } from '../supabaseClient'; 
 
 export default function Logowanie() {
   const [email, setEmail] = useState('');
@@ -22,11 +21,15 @@ export default function Logowanie() {
 
   const zaloguj = async () => {
     setBlad(null);
-    try {
-      await signInWithEmailAndPassword(auth, email, haslo);
-      router.replace('/(tabs)/strona-glowna');
-    } catch (error) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: haslo,
+    });
+
+    if (error) {
       setBlad('Logowanie nie powiodło się: ' + error.message);
+    } else {
+      router.replace('/(tabs)/strona-glowna');
     }
   };
 
