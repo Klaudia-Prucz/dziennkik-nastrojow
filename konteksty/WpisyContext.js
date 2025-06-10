@@ -77,4 +77,5 @@ export const WpisyProvider = ({ children }) => {
   );
 };
 
+export default WpisyContext;
 export const useWpisy = () => useContext(WpisyContext);
