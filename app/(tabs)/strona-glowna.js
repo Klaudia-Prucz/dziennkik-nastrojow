@@ -87,18 +87,20 @@ export default function StronaGlowna() {
 
   const dzisiaj = new Date().toDateString();
 
-  const dzisiejszyWpis = useMemo(() => {
-    return wpisy.find((w) => new Date(w.date).toDateString() === dzisiaj);
-  }, [wpisy]);
+  const dzisiejszeWpisy = wpisy.filter(
+    (w) => new Date(w.date).toDateString() === dzisiaj
+  );
 
-  const starszeWpisy = useMemo(() => {
-    return wpisy.filter((w) => new Date(w.date).toDateString() !== dzisiaj);
-  }, [wpisy]);
+  const najnowszyDzisiejszyWpis = dzisiejszeWpisy[0];
+
+  const pozostaleWpisy = wpisy.filter(
+    (w) => w.id !== najnowszyDzisiejszyWpis?.id
+  );
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={starszeWpisy}
+        data={pozostaleWpisy}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
@@ -121,15 +123,16 @@ export default function StronaGlowna() {
               </View>
             )}
 
-            {dzisiejszyWpis ? (
-              <View style={styles.kartaDniaBox}>
-                <Text style={styles.kartaDniaTytul}>Najnowszy wpis:</Text>
-                <Text style={styles.kartaDniaTekst}>
-                  {dzisiejszyWpis.mood}
-                </Text>
-                {dzisiejszyWpis.image_url && (
+            {najnowszyDzisiejszyWpis ? (
+              <Pressable
+                style={styles.kartaDniaBox}
+                onPress={() => router.push(`/wpis/${String(najnowszyDzisiejszyWpis.id)}`)}
+              >
+                <Text style={styles.kartaDniaTytul}>Karta dnia</Text>
+                <Text style={styles.kartaDniaTekst}>{najnowszyDzisiejszyWpis.mood}</Text>
+                {najnowszyDzisiejszyWpis.image_url && (
                   <Image
-                    source={{ uri: dzisiejszyWpis.image_url }}
+                    source={{ uri: najnowszyDzisiejszyWpis.image_url }}
                     style={{
                       width: '100%',
                       height: 200,
@@ -139,7 +142,7 @@ export default function StronaGlowna() {
                     resizeMode="cover"
                   />
                 )}
-              </View>
+              </Pressable>
             ) : (
               <TouchableOpacity
                 style={styles.dodajKafel}
@@ -150,16 +153,15 @@ export default function StronaGlowna() {
             )}
 
             <Text style={styles.naglowek}>Poprzednie wpisy</Text>
-
-            {starszeWpisy.length === 0 && (
-              <Text style={styles.brak}>Brak wcześniejszych wpisów.</Text>
-            )}
           </View>
+        }
+        ListEmptyComponent={
+          <Text style={styles.brak}>Brak wcześniejszych wpisów.</Text>
         }
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => router.push(`/wpis/${item.id}`)}
+            onPress={() => router.push(`/wpis/${String(item.id)}`)}
             style={styles.wpis}
           >
             <View style={styles.wpisTop}>
@@ -184,9 +186,7 @@ export default function StronaGlowna() {
                 {item.summary}
               </Text>
             </View>
-
             <Text style={styles.nastrojTekst}>Nastrój: {item.mood}</Text>
-
             {item.image_url && (
               <Image
                 source={{ uri: item.image_url }}
@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
   brak: {
     fontSize: 16,
     color: '#888',
+    paddingTop: 10,
   },
   wpis: {
     backgroundColor: '#e0f7fa',

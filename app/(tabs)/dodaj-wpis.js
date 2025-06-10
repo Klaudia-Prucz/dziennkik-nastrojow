@@ -72,71 +72,71 @@ export default function DodajWpis() {
     }
   };
 
-  const zapisz = async () => {
-    if (!nastroj.trim()) {
-      setModalContent({
-        title: 'Uwaga',
-        message: 'Wpisz jak się czujesz',
-        onConfirm: () => setModalVisible(false),
-      });
-      setModalVisible(true);
-      return;
-    }
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (!user || userError) {
-      setModalContent({
-        title: 'Błąd',
-        message: 'Nie udało się ustalić użytkownika. Spróbuj ponownie.',
-        onConfirm: () => setModalVisible(false),
-      });
-      setModalVisible(true);
-      return;
-    }
-
-    let imageUrl = null;
-    if (zdjecie) {
-      imageUrl = await uploadZdjecieDoSupabase(zdjecie, user.id);
-    }
-
-    const { error } = await supabase.from('entries').insert([
-      {
-        mood: nastroj,
-        note: notatka,
-        plan,
-        summary: podsumowanie,
-        date: new Date().toISOString(),
-        image_url: imageUrl,
-        user_id: user.id,
-      },
-    ]);
-
-    if (error) {
-      setModalContent({
-        title: 'Błąd zapisu',
-        message: error.message,
-        onConfirm: () => setModalVisible(false),
-      });
-      setModalVisible(true);
-      return;
-    }
-
-    setNastroj('');
-    setNotatka('');
-    setPlan('');
-    setPodsumowanie('');
-    setZdjecie(null);
-
+ const zapisz = async () => {
+  if (!nastroj.trim()) {
     setModalContent({
-      title: 'Zapisano',
-      message: 'Twój wpis został dodany!',
-      onConfirm: () => {
-        setModalVisible(false);
-        router.replace('/(tabs)/strona-glowna');
-      },
+      title: 'Uwaga',
+      message: 'Wpisz jak się czujesz',
+      onConfirm: () => setModalVisible(false),
     });
     setModalVisible(true);
+    return;
+  }
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (!user || userError) {
+    setModalContent({
+      title: 'Błąd',
+      message: 'Nie udało się ustalić użytkownika. Spróbuj ponownie.',
+      onConfirm: () => setModalVisible(false),
+    });
+    setModalVisible(true);
+    return;
+  }
+
+  let imageUrl = null;
+  if (zdjecie) {
+    imageUrl = await uploadZdjecieDoSupabase(zdjecie, user.id);
+  }
+
+  const nowyWpis = {
+    mood: nastroj.trim(),
+    note: notatka.trim() || '',
+    plan: plan.trim() || '',
+    summary: podsumowanie || '',
+    image_url: imageUrl || null,
+    user_id: user.id,
+    date: new Date().toISOString(),
   };
+
+  const { error } = await supabase.from('entries').insert([nowyWpis]);
+
+  if (error) {
+    setModalContent({
+      title: 'Błąd zapisu',
+      message: error.message,
+      onConfirm: () => setModalVisible(false),
+    });
+    setModalVisible(true);
+    return;
+  }
+
+  setNastroj('');
+  setNotatka('');
+  setPlan('');
+  setPodsumowanie('');
+  setZdjecie(null);
+
+  setModalContent({
+    title: 'Zapisano',
+    message: 'Twój wpis został dodany!',
+    onConfirm: () => {
+      setModalVisible(false);
+      router.replace('/(tabs)/strona-glowna');
+    },
+  });
+  setModalVisible(true);
+};
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

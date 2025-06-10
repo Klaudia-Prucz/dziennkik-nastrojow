@@ -1,59 +1,74 @@
-// konteksty/WpisyContext.js
-import { getAuth } from 'firebase/auth';
-import {
-  addDoc,
-  collection,
-  getDocs,
-  orderBy,
-  query,
-  where
-} from 'firebase/firestore';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { db } from '../firebaseConfig';
+import { supabase } from '../supabaseClient';
 
 const WpisyContext = createContext();
 
 export const WpisyProvider = ({ children }) => {
   const [wpisy, setWpisy] = useState([]);
+  const [user, setUser] = useState(null);
 
   const odswiezWpisy = useCallback(async () => {
-    const user = getAuth().currentUser;
     if (!user) return;
 
-    try {
-      const q = query(
-        collection(db, 'wpisy'),
-        where('uid', '==', user.uid),
-        orderBy('data', 'desc')
-      );
+    const { data, error } = await supabase
+      .from('entries')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false });
 
-      const snapshot = await getDocs(q);
-      const dane = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setWpisy(dane);
-    } catch (err) {
-      console.error('Błąd przy odświeżaniu wpisów:', err);
+    if (error) {
+      console.error('Błąd przy pobieraniu wpisów:', error.message);
+      return;
     }
-  }, []);
+
+    setWpisy(data || []);
+  }, [user]);
 
   const zapiszWpis = async (nowy) => {
-    const user = getAuth().currentUser;
-    if (!user) return;
-
-    try {
-      await addDoc(collection(db, 'wpisy'), {
-        ...nowy,
-        uid: user.uid,
-        data: new Date().toISOString(),
-      });
-      odswiezWpisy();
-    } catch (err) {
-      console.error('Błąd przy zapisie wpisu:', err);
+    if (!user) {
+      console.warn('Nie można zapisać – brak zalogowanego użytkownika.');
+      return;
     }
+
+    const wpis = {
+      ...nowy,
+      user_id: user.id,
+      date: new Date().toISOString(),
+    };
+
+    const { error } = await supabase.from('entries').insert(wpis);
+    if (error) {
+      console.error('Błąd przy zapisie wpisu:', error.message);
+      return;
+    }
+
+    await odswiezWpisy();
   };
 
   useEffect(() => {
-    odswiezWpisy();
-  }, [odswiezWpisy]);
+    const sprawdzSesje = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    sprawdzSesje();
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      odswiezWpisy();
+    } else {
+      setWpisy([]); // wyczyść wpisy po wylogowaniu
+    }
+  }, [user, odswiezWpisy]);
 
   return (
     <WpisyContext.Provider value={{ wpisy, zapiszWpis, odswiezWpisy }}>

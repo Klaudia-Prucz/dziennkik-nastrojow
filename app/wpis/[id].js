@@ -3,35 +3,36 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Image,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { useWpisy } from '../../konteksty/WpisyContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function SzczegolyWpisu() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { wpisy } = useWpisy();
+  const insets = useSafeAreaInsets();
 
-  const wpis = wpisy.find((w) => w.id === id);
+  const wpis = wpisy.find((w) => String(w.id) === String(id));
 
   if (!wpis) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <Text style={styles.error}>Nie znaleziono wpisu.</Text>
         <Pressable onPress={() => router.back()} style={styles.powrot}>
           <Ionicons name="arrow-back" size={20} color="#E76617" />
           <Text style={styles.powrotTekst}>Powrót</Text>
         </Pressable>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <Pressable
           onPress={() => router.replace('/(tabs)/strona-glowna')}
@@ -41,35 +42,36 @@ export default function SzczegolyWpisu() {
           <Text style={styles.powrotTekst}>Powrót</Text>
         </Pressable>
 
-        <Text style={styles.data}>{sformatujDate(wpis.data)}</Text>
+        <Text style={styles.data}>{sformatujDate(wpis.date)}</Text>
 
         <View style={styles.card}>
           <Text style={styles.label}>Jak się czułaś:</Text>
-          <Text style={styles.text}>{wpis.nastroj}</Text>
+          <Text style={styles.text}>{wpis.mood || '—'}</Text>
 
           <Text style={styles.label}>Co się wydarzyło:</Text>
-          <Text style={styles.text}>{wpis.notatka || '—'}</Text>
+          <Text style={styles.text}>{wpis.note || '—'}</Text>
 
           <Text style={styles.label}>Co zamierzasz dalej zrobić:</Text>
           <Text style={styles.text}>{wpis.plan || '—'}</Text>
 
           <Text style={styles.label}>Podsumowanie:</Text>
-          <Text style={styles.text}>{wpis.podsumowanie}</Text>
+          <Text style={styles.text}>{wpis.summary || '—'}</Text>
 
-          {wpis.zdjecie && (
+          {wpis.image_url && (
             <>
               <Text style={styles.label}>Zdjęcie:</Text>
-              <Image source={{ uri: wpis.zdjecie }} style={styles.image} />
+              <Image source={{ uri: wpis.image_url }} style={styles.image} />
             </>
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const sformatujDate = (iso) => {
   const d = new Date(iso);
+  if (isNaN(d)) return 'Nieznana data';
   return d.toLocaleString('pl-PL', {
     weekday: 'long',
     day: '2-digit',
@@ -87,6 +89,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingBottom: 40,
   },
   powrot: {
     flexDirection: 'row',
