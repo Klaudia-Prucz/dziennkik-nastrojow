@@ -28,7 +28,7 @@ export default function Rejestracja() {
     if (error) {
       setBlad('Rejestracja nie powiodła się: ' + error.message);
     } else {
-      router.replace('/logowanie'); // albo /strona-glowna jeśli bez weryfikacji
+      router.replace('/logowanie');
     }
   };
 

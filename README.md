@@ -15,12 +15,13 @@
 
 ## Funkcjonalności
 
-- [x] Logowanie (z wykorzystaniem `AsyncStorage`)
+- [x] Autoryzacja z Supabase
 - [x] Dodawanie wpisów z nastrojem, planem i notatką
 - [x] Dodawanie zdjęcia z galerii lub aparatu
 - [x] Historia wpisów i widok szczegółów
 - [x] Statystyki: dominanta nastroju i sugestia
 - [x] Komponent powiadomień modalnych
+- [x] Pobieranie pogody zgodniej z lokalizacją
 - [x] Responsywny interfejs
 
 ## Stack technologiczny
@@ -30,6 +31,7 @@
 - JavaScript (ES6+)
 - AsyncStorage
 - Expo ImagePicker
+- Supabase (baza danych)
 
 ## Struktura folderów
 
@@ -75,7 +77,6 @@ Projekt w trakcie realizacji. Ostatnia aktualizacja: **czerwiec 2025**.
 
 ## Plany rozwoju
 
-- [ ] Przechowywanie danych w chmurze (np. Firebase)
 - [ ] Ustawienia konta i edycja profilu
 - [ ] Przypomnienia o dodaniu wpisu
 
